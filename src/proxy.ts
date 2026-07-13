@@ -43,12 +43,13 @@ export async function proxy(request: NextRequest) {
       const activeWorkspaceId = request.cookies.get(ACTIVE_WORKSPACE_COOKIE)?.value;
       const role = await resolveActiveRole(supabase, user.id, activeWorkspaceId);
 
-      // No active membership (e.g. a pending invitee): only the neutral user
-      // view is permitted; everything else routes there.
+      // No active membership (e.g. a pending invitee): redirect to /dashboard
+      // so any pending invitation is auto-accepted, or they are sent to onboarding
+      // (/dashboard/owner/workspaces/new). Allow onboarding page directly.
       if (role == null) {
-        if (segment !== "user") {
+        if (pathname !== "/dashboard/owner/workspaces/new") {
           const url = request.nextUrl.clone();
-          url.pathname = "/dashboard/user";
+          url.pathname = "/dashboard";
           url.search = "";
           return NextResponse.redirect(url);
         }

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createWorkspace } from "@/lib/dal/workspaces";
 
 export type AuthResult = { ok: true; needsConfirmation?: boolean } | { ok: false; error: string };
@@ -33,17 +34,31 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     return { ok: false, error: "Password must be at least 8 characters." };
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
+  // Provision the account server-side with the service-role client and mark the
+  // email confirmed. This sends NO confirmation email, so signup never hits
+  // Supabase's email-send rate limit ("over_email_send_rate_limit"), and the
+  // user gets immediate access — the behavior the app had before.
+  const admin = createAdminClient();
+  const { error: createError } = await admin.auth.admin.createUser({
     email,
     password,
-    options: { data: { full_name: fullName || null } },
+    email_confirm: true,
+    user_metadata: { full_name: fullName || null },
   });
-  if (error) return { ok: false, error: error.message };
+  if (createError) {
+    const msg = /already been registered|already registered/i.test(createError.message)
+      ? "An account with this email already exists. Please sign in."
+      : createError.message;
+    return { ok: false, error: msg };
+  }
 
-  // When email confirmation is enabled, no session is returned yet.
-  const needsConfirmation = !data.session;
-  return { ok: true, needsConfirmation };
+  // Establish the session (sets auth cookies) so downstream work like workspace
+  // creation runs as the new user.
+  const supabase = await createClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (signInError) return { ok: false, error: signInError.message };
+
+  return { ok: true, needsConfirmation: false };
 }
 
 // Sign up and, when a session is immediately available (email confirmation
