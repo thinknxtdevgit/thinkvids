@@ -9,7 +9,6 @@ import {
   Check,
   ChevronDown,
   Copy,
-  Image as ImageIcon,
   Loader2,
   Shield,
   CheckCircle2,
@@ -66,9 +65,7 @@ export default function OwnerNewWorkspacePage() {
   const [slugEdited, setSlugEdited] = useState(false);
   const [slugStatus, setSlugStatus] = useState<SlugStatus>("idle");
   const [description, setDescription] = useState("");
-  const [tier, setTier] = useState("pro");
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [logoName, setLogoName] = useState<string | null>(null);
+  const tier = "pro";
 
   // Step 2 — invite admin
   const [adminEmail, setAdminEmail] = useState("");
@@ -109,17 +106,6 @@ export default function OwnerNewWorkspacePage() {
 
   const step1Valid = name.trim().length > 0 && slugStatus === "available";
 
-  const handleLogo = (file: File | null) => {
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Logo must be under 2MB.");
-      return;
-    }
-    setLogoName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => setLogoPreview(String(reader.result));
-    reader.readAsDataURL(file);
-  };
 
   const copy = (text: string, label: string) => {
     navigator.clipboard?.writeText(text).then(
@@ -185,9 +171,6 @@ export default function OwnerNewWorkspacePage() {
     setSlugEdited(false);
     setSlugStatus("idle");
     setDescription("");
-    setTier("pro");
-    setLogoPreview(null);
-    setLogoName(null);
     setAdminEmail("");
     setAdminName("");
     setMessage("");
@@ -314,70 +297,7 @@ export default function OwnerNewWorkspacePage() {
               </div>
             </Field>
 
-            {/* Logo */}
-            <Field label="Workspace Logo">
-              {logoPreview ? (
-                <div className="flex items-center gap-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={logoPreview} alt="Logo preview" className="w-20 h-20 rounded-lg object-cover border border-zinc-200" />
-                  <div className="space-y-1">
-                    <p className="text-sm font-semibold text-zinc-700">{logoName}</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLogoPreview(null);
-                        setLogoName(null);
-                      }}
-                      className="text-xs font-bold text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-200 rounded-xl py-10 px-6 cursor-pointer hover:border-brand-green/50 hover:bg-brand-green-light/30 transition-colors text-center">
-                  <ImageIcon size={40} className="text-zinc-300" />
-                  <span className="text-sm font-bold text-zinc-700">Drop logo here or click to browse</span>
-                  <span className="text-xs font-semibold text-zinc-400">PNG, JPG, or SVG up to 2MB</span>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/svg+xml"
-                    className="hidden"
-                    onChange={(e) => handleLogo(e.target.files?.[0] ?? null)}
-                  />
-                </label>
-              )}
-            </Field>
 
-            {/* Tier */}
-            <Field label="Subscription Tier">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 select-none">
-                {[
-                  { key: "free", label: "Free", limit: "5 members · 5GB · 50 credits/mo" },
-                  { key: "pro", label: "Pro", limit: "25 members · 100GB · 500 credits/mo" },
-                  { key: "enterprise", label: "Enterprise", limit: "Unlimited · 1TB · 5000 credits/mo" },
-                ].map((t) => (
-                  <button
-                    key={t.key}
-                    type="button"
-                    onClick={() => setTier(t.key)}
-                    className={`border rounded-xl p-3.5 text-left transition-all flex flex-col gap-2 h-24 ${
-                      tier === t.key ? "border-brand-green bg-brand-green-light shadow-sm" : "border-zinc-200 hover:bg-zinc-50"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-zinc-900">{t.label}</span>
-                      {tier === t.key && (
-                        <span className="w-4 h-4 rounded-full bg-brand-green flex items-center justify-center text-white">
-                          <Check size={10} strokeWidth={3} />
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[10px] font-semibold text-zinc-400 leading-snug">{t.limit}</span>
-                  </button>
-                ))}
-              </div>
-            </Field>
 
             <button
               type="button"
