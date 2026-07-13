@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Play, Loader2 } from "lucide-react";
+import { Play, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { registerWithWorkspace } from "@/app/auth/actions";
 import { createClient } from "@/lib/supabase/client";
@@ -108,20 +108,6 @@ export default function RegisterPage() {
           <h2 className="text-4xl font-extrabold leading-tight tracking-tight">
             Start your video journey today.
           </h2>
-          <ul className="space-y-4">
-            {[
-              "Free 14-day trial",
-              "No credit card required",
-              "Cancel anytime",
-            ].map((item, idx) => (
-              <li key={idx} className="flex items-center gap-3 text-sm font-bold">
-                <div className="w-6 h-6 rounded-full border-2 border-white/30 flex items-center justify-center text-white shrink-0">
-                  <Check size={12} strokeWidth={3} />
-                </div>
-                {item}
-              </li>
-            ))}
-          </ul>
         </div>
 
         {/* Bottom: Copyright */}

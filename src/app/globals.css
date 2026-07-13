@@ -34,6 +34,13 @@ body {
   overflow-x: hidden;
 }
 
+/* Hide the browser's native password reveal control (Edge/IE) so it doesn't
+   flicker in and out and conflict with our own show/hide toggle. */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
 /* Custom background animations/glows for landing page */
 .glow-spotlight {
   position: absolute;
