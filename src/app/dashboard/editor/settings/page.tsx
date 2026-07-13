@@ -1,16 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User, Shield, Bell, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { initialsFrom } from "@/lib/utils/initials";
 
 export default function EditorSettingsPage() {
-  const [fullName, setFullName] = useState("Tom W.");
-  const [phoneNumber, setPhoneNumber] = useState("+1 (555) 765-4321");
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [bio, setBio] = useState(
     "Senior Video Editor at Acme Corp. Editing high-quality clips, captions, and transitions."
   );
+
+  // Load the signed-in user's real profile (name from signup, phone if set).
+  useEffect(() => {
+    const supabase = createClient();
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setEmail(user.email ?? "");
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("id", user.id)
+        .single();
+      if (data) {
+        setFullName(data.full_name ?? "");
+        setPhoneNumber(data.phone ?? "");
+      }
+    })();
+  }, []);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -47,8 +68,22 @@ export default function EditorSettingsPage() {
     }
   };
 
-  const handleSaveChanges = (e: React.FormEvent) => {
+  const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("You are not signed in.");
+      return;
+    }
+    const { error } = await supabase
+      .from("profiles")
+      .update({ full_name: fullName, phone: phoneNumber || null })
+      .eq("id", user.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Profile details saved successfully!");
   };
 
@@ -68,7 +103,7 @@ export default function EditorSettingsPage() {
           {/* Profile Picture Card */}
           <div className="flex items-center gap-6 border-b border-zinc-100 pb-6">
             <div className="w-20 h-20 rounded-full bg-brand-green flex items-center justify-center font-bold text-xl text-white shrink-0 shadow-xs">
-              TW
+              {initialsFrom(fullName, email)}
             </div>
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-zinc-900">Avatar Image</h4>
@@ -109,7 +144,7 @@ export default function EditorSettingsPage() {
                 <input
                   type="email"
                   disabled
-                  value="tom.editor@acmecorp.com"
+                  value={email}
                   className="w-full px-4 h-11 border border-zinc-200 bg-zinc-50 text-zinc-400 rounded-xl text-sm font-semibold outline-none cursor-not-allowed"
                 />
               </div>

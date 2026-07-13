@@ -1,16 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User, Shield, Bell, CreditCard, Share2, Sliders } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { initialsFrom } from "@/lib/utils/initials";
 
 export default function UserSettingsPage() {
-  const [fullName, setFullName] = useState("Sarah J.");
-  const [phoneNumber, setPhoneNumber] = useState("+1 (555) 345-6789");
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [bio, setBio] = useState(
     "Content Creator at Acme Corp. Specializing in promotional videos and social media clips."
   );
+
+  // Load the signed-in user's real profile (name from signup, phone if set).
+  useEffect(() => {
+    const supabase = createClient();
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setEmail(user.email ?? "");
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("id", user.id)
+        .single();
+      if (data) {
+        setFullName(data.full_name ?? "");
+        setPhoneNumber(data.phone ?? "");
+      }
+    })();
+  }, []);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -53,8 +74,22 @@ export default function UserSettingsPage() {
     }
   };
 
-  const handleSaveChanges = (e: React.FormEvent) => {
+  const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("You are not signed in.");
+      return;
+    }
+    const { error } = await supabase
+      .from("profiles")
+      .update({ full_name: fullName, phone: phoneNumber || null })
+      .eq("id", user.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Profile details saved successfully!");
   };
 
@@ -74,7 +109,7 @@ export default function UserSettingsPage() {
           {/* Profile Picture Card */}
           <div className="flex items-center gap-6 border-b border-zinc-100 pb-6 text-left">
             <div className="w-20 h-20 rounded-full bg-brand-green flex items-center justify-center font-bold text-xl text-white shrink-0 shadow-xs">
-              SJ
+              {initialsFrom(fullName, email)}
             </div>
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-zinc-900">Profile Picture</h4>
@@ -121,7 +156,7 @@ export default function UserSettingsPage() {
                 <input
                   type="email"
                   disabled
-                  value="sarah.johnson@acmecorp.com"
+                  value={email}
                   className="w-full px-4 h-11 border border-zinc-200 bg-zinc-50 text-zinc-400 rounded-xl text-sm font-semibold outline-none cursor-not-allowed"
                 />
               </div>
