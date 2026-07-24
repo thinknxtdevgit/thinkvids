@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIVE_WORKSPACE_COOKIE, primaryRole } from "@/lib/auth/roles";
@@ -62,6 +62,13 @@ export const hasPendingMembership = cache(async (): Promise<boolean> => {
 export const getActiveMembership = cache(async (): Promise<WorkspaceMember | null> => {
   const memberships = await getMemberships();
   if (memberships.length === 0) return null;
+
+  // Native clients select the active workspace with a header (no cookie jar).
+  const headerWorkspace = (await headers()).get("x-workspace-id");
+  if (headerWorkspace) {
+    const match = memberships.find((m) => m.workspace_id === headerWorkspace);
+    if (match) return match;
+  }
 
   const cookieStore = await cookies();
   const selected = cookieStore.get(ACTIVE_WORKSPACE_COOKIE)?.value;

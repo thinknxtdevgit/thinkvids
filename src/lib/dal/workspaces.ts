@@ -25,25 +25,40 @@ export async function listWorkspaces(): Promise<WorkspaceWithRole[]> {
   if (!user) return [];
   const supabase = await createClient();
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_platform_owner")
+    .eq("id", user.id)
+    .single();
+  const isPlatformOwner = profile?.is_platform_owner ?? false;
+
   const { data: memberships, error: mErr } = await supabase
     .from("workspace_members")
     .select("workspace_id, role")
     .eq("user_id", user.id)
     .eq("status", "active");
   if (mErr) throw mErr;
-  if (!memberships || memberships.length === 0) return [];
 
-  const roleByWs = new Map(memberships.map((m) => [m.workspace_id, m.role]));
+  const roleByWs = new Map((memberships ?? []).map((m) => [m.workspace_id, m.role]));
 
-  const { data: workspaces, error: wErr } = await supabase
-    .from("workspaces")
-    .select("*")
-    .in("id", Array.from(roleByWs.keys()));
-  if (wErr) throw wErr;
+  let workspaces: Workspace[] = [];
+  if (isPlatformOwner) {
+    const { data: allWs, error: wErr } = await supabase.from("workspaces").select("*");
+    if (wErr) throw wErr;
+    workspaces = allWs ?? [];
+  } else {
+    if (!memberships || memberships.length === 0) return [];
+    const { data: memberWs, error: wErr } = await supabase
+      .from("workspaces")
+      .select("*")
+      .in("id", Array.from(roleByWs.keys()));
+    if (wErr) throw wErr;
+    workspaces = memberWs ?? [];
+  }
 
-  return (workspaces ?? []).map((ws) => ({
+  return workspaces.map((ws) => ({
     ...ws,
-    role: roleByWs.get(ws.id) as WorkspaceMember["role"],
+    role: (roleByWs.get(ws.id) ?? "owner") as WorkspaceMember["role"],
   }));
 }
 
@@ -73,14 +88,22 @@ export async function getWorkspaceDetail(id: string): Promise<WorkspaceDetail | 
   if (!user) return null;
   const supabase = await createClient();
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_platform_owner")
+    .eq("id", user.id)
+    .single();
+  const isPlatformOwner = profile?.is_platform_owner ?? false;
+
   const { data: membership } = await supabase
     .from("workspace_members")
     .select("role")
     .eq("workspace_id", id)
     .eq("user_id", user.id)
     .eq("status", "active")
-    .single();
-  if (!membership) return null;
+    .maybeSingle();
+
+  if (!membership && !isPlatformOwner) return null;
 
   const workspace = await getWorkspace(id);
   if (!workspace) return null;
@@ -89,7 +112,7 @@ export async function getWorkspaceDetail(id: string): Promise<WorkspaceDetail | 
 
   return {
     workspace,
-    role: membership.role as WorkspaceMember["role"],
+    role: (membership?.role ?? "owner") as WorkspaceMember["role"],
     members,
     projects,
   };
