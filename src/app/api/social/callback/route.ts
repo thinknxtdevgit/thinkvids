@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     const auth = await requireApiMember();
     if (!auth.ok) return auth.response;
 
+    const redirectFolder = ["owner", "admin"].includes(auth.membership.role) ? "admin" : "user";
     const { searchParams } = new URL(request.url);
     // Zernio appends: platform, profileId, accountId, username, status.
     const status = searchParams.get("status");
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
       const errorMsg =
         searchParams.get("error") || searchParams.get("message") || "Account connection failed";
       return NextResponse.redirect(
-        `${APP_URL}/dashboard/user/publish?error=${encodeURIComponent(errorMsg)}`
+        `${APP_URL}/dashboard/${redirectFolder}/publish?error=${encodeURIComponent(errorMsg)}`
       );
     }
 
@@ -59,12 +60,12 @@ export async function GET(request: Request) {
     if (error) {
       console.error("Failed to save connected social account:", error);
       return NextResponse.redirect(
-        `${APP_URL}/dashboard/user/publish?error=${encodeURIComponent(
+        `${APP_URL}/dashboard/${redirectFolder}/publish?error=${encodeURIComponent(
           "Failed to save social account connection"
         )}`
       );
     }
 
-    return NextResponse.redirect(`${APP_URL}/dashboard/user/publish?connected=${platform}`);
+    return NextResponse.redirect(`${APP_URL}/dashboard/${redirectFolder}/publish?connected=${platform}`);
   });
 }

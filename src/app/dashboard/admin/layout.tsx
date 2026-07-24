@@ -13,6 +13,7 @@ import {
   Shield,
   CheckSquare,
   Coins,
+  Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SidebarUserCard, TopbarUserMenu } from "@/components/sidebar-user-card";
@@ -74,6 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: "All Members", href: "/dashboard/admin/team", icon: <Users size={16} />, badge: membersCount !== null ? String(membersCount) : undefined },
     { category: "PUBLISHING" },
     { label: "Approval Queue", href: "/dashboard/admin/approvals", icon: <CheckSquare size={16} /> },
+    { label: "Publishing Hub", href: "/dashboard/admin/publish", icon: <Share2 size={16} /> },
     { category: "BILLING" },
     { label: "Credits", href: "/dashboard/admin/credits", icon: <Coins size={16} /> },
     { category: "CALENDAR" },

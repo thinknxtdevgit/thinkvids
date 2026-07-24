@@ -27,9 +27,11 @@ export async function GET(request: Request, ctx: Ctx) {
     const resolved = await resolveCredential(auth.membership.workspace_id, "publishing");
     const apiKey = resolved?.credential?.apiKey || process.env.ZERNIO_API_KEY;
 
+    const redirectFolder = ["owner", "admin"].includes(auth.membership.role) ? "admin" : "user";
+
     if (!apiKey) {
       return NextResponse.redirect(
-        `${APP_URL}/dashboard/user/publish?error=${encodeURIComponent(
+        `${APP_URL}/dashboard/${redirectFolder}/publish?error=${encodeURIComponent(
           "No Zernio API key configured. Ask your admin to add one under Workspace Settings → API Settings."
         )}`
       );
@@ -49,7 +51,7 @@ export async function GET(request: Request, ctx: Ctx) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to connect to Zernio";
       return NextResponse.redirect(
-        `${APP_URL}/dashboard/user/publish?error=${encodeURIComponent(msg)}`
+        `${APP_URL}/dashboard/${redirectFolder}/publish?error=${encodeURIComponent(msg)}`
       );
     }
 
