@@ -14,7 +14,8 @@ export async function GET(request: Request) {
     url.searchParams.get("status") === "connected" ||
     url.searchParams.get("code") !== null;
 
-  const destination = new URL("/dashboard/user/publish", APP_URL);
+  const appUrl = new URL(request.url).origin;
+  const destination = new URL("/dashboard/user/publish", appUrl);
 
   if (error) {
     destination.searchParams.set("error", error);

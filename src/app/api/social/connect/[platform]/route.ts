@@ -27,11 +27,12 @@ export async function GET(request: Request, ctx: Ctx) {
     const resolved = await resolveCredential(auth.membership.workspace_id, "publishing");
     const apiKey = resolved?.credential?.apiKey || process.env.ZERNIO_API_KEY;
 
+    const appUrl = new URL(request.url).origin;
     const redirectFolder = ["owner", "admin"].includes(auth.membership.role) ? "admin" : "user";
 
     if (!apiKey) {
       return NextResponse.redirect(
-        `${APP_URL}/dashboard/${redirectFolder}/publish?error=${encodeURIComponent(
+        `${appUrl}/dashboard/${redirectFolder}/publish?error=${encodeURIComponent(
           "No Zernio API key configured. Ask your admin to add one under Workspace Settings → API Settings."
         )}`
       );
@@ -39,7 +40,7 @@ export async function GET(request: Request, ctx: Ctx) {
 
     // Build callback URL incorporating platform. Zernio appends
     // platform/profileId/accountId/username/status to this on completion.
-    const callbackUrl = `${APP_URL}/api/social/callback?platform=${platform}`;
+    const callbackUrl = `${appUrl}/api/social/callback?platform=${platform}`;
 
     // Get/create a profile, then ask Zernio for the OAuth authorization URL.
     // Both calls hit the Zernio API server-side with the Bearer key and may
@@ -51,7 +52,7 @@ export async function GET(request: Request, ctx: Ctx) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to connect to Zernio";
       return NextResponse.redirect(
-        `${APP_URL}/dashboard/${redirectFolder}/publish?error=${encodeURIComponent(msg)}`
+        `${appUrl}/dashboard/${redirectFolder}/publish?error=${encodeURIComponent(msg)}`
       );
     }
 

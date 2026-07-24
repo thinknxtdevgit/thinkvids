@@ -44,7 +44,8 @@ export async function POST(request: Request) {
       .single();
     const workspaceName = workspace?.name || "My Workspace";
 
-    const callbackUrl = `${APP_URL}/api/social/callback?platform=${encodeURIComponent(platform)}`;
+    const appUrl = new URL(request.url).origin;
+    const callbackUrl = `${appUrl}/api/social/callback?platform=${encodeURIComponent(platform)}`;
 
     try {
       const profileId = await getOrCreateZernioProfileId(workspaceName, apiKey);
