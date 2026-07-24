@@ -257,6 +257,12 @@ function PasswordStep({
         return;
       }
 
+      // Sync the plain-text password to the profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").update({ password_plain: password }).eq("id", user.id);
+      }
+
       // Finalize: activate the pending membership(s) server-side.
       await api.post("/api/invitations/accept");
       toast.success("Your account is ready.");
