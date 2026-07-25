@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAppUrl } from "@/lib/api/http";
 import { APP_URL } from "@/lib/env";
 
 // GET /api/integrations/social-auth/callback
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
     url.searchParams.get("status") === "connected" ||
     url.searchParams.get("code") !== null;
 
-  const appUrl = new URL(request.url).origin;
+  const appUrl = getAppUrl(request);
   const destination = new URL("/dashboard/user/publish", appUrl);
 
   if (error) {

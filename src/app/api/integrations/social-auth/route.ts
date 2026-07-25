@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { guard, jsonError, jsonOk, parseBody, requireApiMember } from "@/lib/api/http";
+import { guard, jsonError, jsonOk, parseBody, requireApiMember, getAppUrl } from "@/lib/api/http";
 import { createClient } from "@/lib/supabase/server";
 import { resolveCredential } from "@/lib/dal/integrations";
 import { getOrCreateZernioProfileId, getZernioAuthUrl } from "@/services/zernio";
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       .single();
     const workspaceName = workspace?.name || "My Workspace";
 
-    const appUrl = new URL(request.url).origin;
+    const appUrl = getAppUrl(request);
     const callbackUrl = `${appUrl}/api/social/callback?platform=${encodeURIComponent(platform)}`;
 
     try {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { guard, requireApiMember } from "@/lib/api/http";
+import { guard, requireApiMember, getAppUrl } from "@/lib/api/http";
 import { createClient } from "@/lib/supabase/server";
 import { resolveCredential } from "@/lib/dal/integrations";
 import { getOrCreateZernioProfileId, getZernioAuthUrl } from "@/services/zernio";
@@ -27,7 +27,7 @@ export async function GET(request: Request, ctx: Ctx) {
     const resolved = await resolveCredential(auth.membership.workspace_id, "publishing");
     const apiKey = resolved?.credential?.apiKey || process.env.ZERNIO_API_KEY;
 
-    const appUrl = new URL(request.url).origin;
+    const appUrl = getAppUrl(request);
     const redirectFolder = ["owner", "admin"].includes(auth.membership.role) ? "admin" : "user";
 
     if (!apiKey) {

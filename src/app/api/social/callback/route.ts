@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { guard, requireApiMember } from "@/lib/api/http";
+import { guard, requireApiMember, getAppUrl } from "@/lib/api/http";
 import { createClient } from "@/lib/supabase/server";
 import { encryptSecret } from "@/lib/crypto/secrets";
 import { APP_URL } from "@/lib/env";
@@ -9,14 +9,16 @@ export async function GET(request: Request) {
     const auth = await requireApiMember();
     if (!auth.ok) return auth.response;
 
-    const appUrl = new URL(request.url).origin;
+    const appUrl = getAppUrl(request);
     const redirectFolder = ["owner", "admin"].includes(auth.membership.role) ? "admin" : "user";
     const { searchParams } = new URL(request.url);
     // Zernio appends: platform, profileId, accountId, username, status.
     const status = searchParams.get("status");
     const accountId = searchParams.get("accountId") || searchParams.get("zernioAccountId");
     const username = searchParams.get("username") || searchParams.get("name") || "Connected Account";
-    const platform = searchParams.get("platform");
+    let platform = searchParams.get("platform")?.toLowerCase();
+    if (platform === "twitter") platform = "x";
+
     // Treat an explicit error status, or a missing account id, as failure.
     const failed = status === "error" || !accountId;
 

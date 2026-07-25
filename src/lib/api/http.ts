@@ -68,3 +68,41 @@ export async function guard(fn: () => Promise<NextResponse>): Promise<NextRespon
     return jsonError(message, 500);
   }
 }
+
+// Resolve the application's base URL dynamically from the request headers,
+// falling back to request.url or environment configuration, ensuring that
+// wildcards like 0.0.0.0 are filtered out.
+import { APP_URL } from "@/lib/env";
+
+export function getAppUrl(request: Request): string {
+  // If APP_URL is configured to an explicit production domain (not local dev),
+  // prefer it so production VPS setups (Hostinger/Nginx) use the canonical domain.
+  if (
+    APP_URL &&
+    !APP_URL.includes("localhost") &&
+    !APP_URL.includes("127.0.0.1") &&
+    !APP_URL.includes("0.0.0.0")
+  ) {
+    return APP_URL.replace(/\/$/, "");
+  }
+
+  let host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  let proto = request.headers.get("x-forwarded-proto") || "http";
+
+  if (host) {
+    if (host.includes("0.0.0.0")) {
+      host = host.replace("0.0.0.0", "localhost");
+    }
+    if (request.url.startsWith("https://")) {
+      proto = "https";
+    }
+    return `${proto}://${host}`;
+  }
+
+  let origin = new URL(request.url).origin;
+  if (origin.includes("0.0.0.0")) {
+    origin = origin.replace("0.0.0.0", "localhost");
+  }
+
+  return origin || APP_URL || "http://localhost:3000";
+}
