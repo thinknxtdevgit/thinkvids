@@ -30,19 +30,19 @@ export default function MarketingLayout({
               Platform
             </Link>
             <Link
-              href="#features"
+              href="/#features"
               className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors"
             >
               Features
             </Link>
             <Link
-              href="#solutions"
+              href="/#solutions"
               className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors"
             >
               Solutions
             </Link>
             <Link
-              href="#pricing"
+              href="/#pricing"
               className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors"
             >
               Pricing
@@ -88,21 +88,21 @@ export default function MarketingLayout({
               Platform
             </Link>
             <Link
-              href="#features"
+              href="/#features"
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 pl-2"
             >
               Features
             </Link>
             <Link
-              href="#solutions"
+              href="/#solutions"
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 pl-2"
             >
               Solutions
             </Link>
             <Link
-              href="#pricing"
+              href="/#pricing"
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-sm font-semibold text-zinc-500 hover:text-zinc-900 pl-2"
             >
@@ -153,17 +153,17 @@ export default function MarketingLayout({
               <h4 className="text-white text-xs font-bold uppercase tracking-wider">Product</h4>
               <ul className="space-y-2.5 text-sm font-medium">
                 <li>
-                  <Link href="#features" className="hover:text-white transition-colors">
+                  <Link href="/features" className="hover:text-white transition-colors">
                     Features
                   </Link>
                 </li>
                 <li>
-                  <Link href="#api" className="hover:text-white transition-colors">
+                  <Link href="/api-docs" className="hover:text-white transition-colors">
                     API
                   </Link>
                 </li>
                 <li>
-                  <Link href="#security" className="hover:text-white transition-colors">
+                  <Link href="/security" className="hover:text-white transition-colors">
                     Security
                   </Link>
                 </li>
@@ -197,17 +197,17 @@ export default function MarketingLayout({
               <h4 className="text-white text-xs font-bold uppercase tracking-wider">Legal</h4>
               <ul className="space-y-2.5 text-sm font-medium">
                 <li>
-                  <Link href="#privacy" className="hover:text-white transition-colors">
+                  <Link href="/privacy" className="hover:text-white transition-colors">
                     Privacy
                   </Link>
                 </li>
                 <li>
-                  <Link href="#terms" className="hover:text-white transition-colors">
+                  <Link href="/terms" className="hover:text-white transition-colors">
                     Terms
                   </Link>
                 </li>
                 <li>
-                  <Link href="#cookies" className="hover:text-white transition-colors">
+                  <Link href="/cookies" className="hover:text-white transition-colors">
                     Cookie Policy
                   </Link>
                 </li>

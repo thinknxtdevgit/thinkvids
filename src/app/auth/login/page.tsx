@@ -240,6 +240,19 @@ export default function LoginPage() {
               Sign up
             </Link>
           </div>
+
+          {/* Terms Fine Print */}
+          <div className="text-center text-[11px] font-semibold text-zinc-400 pt-5 border-t border-zinc-100 mt-5 leading-normal">
+            By signing in, you agree to our{" "}
+            <Link href="/terms" className="text-brand-green hover:underline font-bold">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-brand-green hover:underline font-bold">
+              Privacy Policy
+            </Link>
+            .
+          </div>
         </div>
       </div>
     </div>
