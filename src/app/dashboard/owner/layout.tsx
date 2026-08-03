@@ -12,6 +12,7 @@ import {
   Settings,
   Bell,
   Crown,
+  Menu,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SidebarUserCard, TopbarUserMenu } from "@/components/sidebar-user-card";
@@ -22,6 +23,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [workspacesCount, setWorkspacesCount] = useState<number | null>(null);
   const [projectsCount, setProjectsCount] = useState<number | null>(null);
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
@@ -72,8 +74,18 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-zinc-50/50">
+      {/* Backdrop for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Left Sidebar (bg-sidebar-bg) */}
-      <aside className="w-64 h-screen sticky top-0 bg-sidebar-bg flex flex-col justify-between p-6 shrink-0 select-none text-zinc-650 border-r border-sidebar-border">
+      <aside className={`w-64 h-screen fixed lg:sticky top-0 bg-sidebar-bg flex flex-col justify-between p-6 shrink-0 select-none text-zinc-655 border-r border-sidebar-border z-50 lg:z-auto transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      }`}>
         <div className="space-y-8">
           {/* Logo / Workspace name */}
           <div className="flex items-center gap-2.5 px-1 select-none text-left">
@@ -107,6 +119,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={idx}
                   href={item.href!}
+                  onClick={() => setIsSidebarOpen(false)}
                   className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                     isActive
                       ? "bg-sidebar-active-bg text-sidebar-active-text font-bold"
@@ -135,6 +148,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
           <nav className="space-y-1">
             <Link
               href="/dashboard/owner/settings"
+              onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                 pathname === "/dashboard/owner/settings"
                   ? "bg-sidebar-active-bg text-sidebar-active-text font-bold"
@@ -154,8 +168,14 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar Navigation */}
-        <header className="h-16 border-b border-sidebar-border bg-white px-8 flex items-center justify-between shrink-0 select-none z-45">
+        <header className="h-16 border-b border-sidebar-border bg-white px-4 sm:px-8 flex items-center justify-between shrink-0 select-none z-45">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg lg:hidden cursor-pointer"
+            >
+              <Menu size={20} />
+            </button>
             <BackButton />
             <div className="flex items-center gap-2 text-xs font-bold text-zinc-450 uppercase tracking-wider">
               <Crown size={14} className="text-brand-green" />
