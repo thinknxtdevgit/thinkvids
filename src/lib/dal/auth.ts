@@ -61,13 +61,27 @@ export const hasPendingMembership = cache(async (): Promise<boolean> => {
 // belongs to it, otherwise their highest-privilege membership.
 export const getActiveMembership = cache(async (): Promise<WorkspaceMember | null> => {
   const memberships = await getMemberships();
-  if (memberships.length === 0) return null;
+  const profile = await getProfile();
+  const isPlatformOwner = profile?.is_platform_owner ?? false;
 
   // Native clients select the active workspace with a header (no cookie jar).
   const headerWorkspace = (await headers()).get("x-workspace-id");
   if (headerWorkspace) {
     const match = memberships.find((m) => m.workspace_id === headerWorkspace);
     if (match) return match;
+    if (isPlatformOwner) {
+      return {
+        id: `mock-member-${headerWorkspace}`,
+        workspace_id: headerWorkspace,
+        user_id: profile!.id,
+        role: "owner",
+        status: "active",
+        invited_by: null,
+        password_changed_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
   }
 
   const cookieStore = await cookies();
@@ -75,6 +89,40 @@ export const getActiveMembership = cache(async (): Promise<WorkspaceMember | nul
   if (selected) {
     const match = memberships.find((m) => m.workspace_id === selected);
     if (match) return match;
+    if (isPlatformOwner) {
+      return {
+        id: `mock-member-${selected}`,
+        workspace_id: selected,
+        user_id: profile!.id,
+        role: "owner",
+        status: "active",
+        invited_by: null,
+        password_changed_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+  }
+
+  if (memberships.length === 0) {
+    if (isPlatformOwner) {
+      const supabase = await createClient();
+      const { data: firstWs } = await supabase.from("workspaces").select("id").limit(1).maybeSingle();
+      if (firstWs) {
+        return {
+          id: `mock-member-${firstWs.id}`,
+          workspace_id: firstWs.id,
+          user_id: profile!.id,
+          role: "owner",
+          status: "active",
+          invited_by: null,
+          password_changed_at: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+      }
+    }
+    return null;
   }
 
   const best = primaryRole(memberships.map((m) => m.role));

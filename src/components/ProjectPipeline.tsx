@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Sparkles,
   Loader2,
@@ -41,6 +42,8 @@ const ASPECTS: { id: "16:9" | "9:16" | "1:1"; label: string; box: string }[] = [
 ];
 
 export default function ProjectPipeline({ projectId }: { projectId: string }) {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/dashboard/admin");
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
 
@@ -699,7 +702,7 @@ export default function ProjectPipeline({ projectId }: { projectId: string }) {
               <Layers size={14} /> Manage Versions
             </button>
             <Link
-              href={`/dashboard/user/projects/${projectId}/publish`}
+              href={isAdmin ? `/dashboard/admin/projects/${projectId}/publish` : `/dashboard/user/projects/${projectId}/publish`}
               className="flex items-center gap-1.5 rounded-xl border border-zinc-200 px-4 py-2.5 text-xs font-bold text-zinc-700 hover:bg-zinc-50"
             >
               <ExternalLink size={14} /> Publish

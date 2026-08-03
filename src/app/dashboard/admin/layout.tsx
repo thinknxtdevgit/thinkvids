@@ -34,16 +34,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         type Project = { id: string };
         type Workspace = { name: string };
         type Notification = { is_read: boolean };
-        const [members, projects, workspaces, notifs] = await Promise.all([
+        const [members, projects, activeWsData, notifs] = await Promise.all([
           api.get<Member[]>("/api/members").catch(() => [] as Member[]),
           api.get<Project[]>("/api/projects").catch(() => [] as Project[]),
-          api.get<Workspace[]>("/api/workspaces").catch(() => [] as Workspace[]),
+          api.get<{ workspace: Workspace | null }>("/api/workspaces/active").catch(() => ({ workspace: null })),
           api.get<Notification[]>("/api/notifications").catch(() => [] as Notification[]),
         ]);
         setMembersCount(members.length);
         setProjectsCount(projects.length);
         setUnreadCount(notifs.filter((n) => !n.is_read).length);
-        if (workspaces.length > 0) setWorkspaceName(workspaces[0].name);
+        if (activeWsData?.workspace) setWorkspaceName(activeWsData.workspace.name);
       } catch {
         // Fail silently — counts just won't render
       }

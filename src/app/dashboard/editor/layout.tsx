@@ -31,11 +31,11 @@ function EditorLayoutInner({ children }: { children: React.ReactNode }) {
       try {
         type Workspace = { name: string };
         type Notification = { is_read: boolean };
-        const [workspaces, notifs] = await Promise.all([
-          api.get<Workspace[]>("/api/workspaces").catch(() => [] as Workspace[]),
+        const [activeWsData, notifs] = await Promise.all([
+          api.get<{ workspace: Workspace | null }>("/api/workspaces/active").catch(() => ({ workspace: null })),
           api.get<Notification[]>("/api/notifications").catch(() => [] as Notification[]),
         ]);
-        if (workspaces.length > 0) setWorkspaceName(workspaces[0].name);
+        if (activeWsData?.workspace) setWorkspaceName(activeWsData.workspace.name);
         setUnreadCount(notifs.filter((n) => !n.is_read).length);
       } catch {
         // Fail silently

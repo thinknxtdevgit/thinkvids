@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { FolderKanban, Loader2, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api, ApiError } from "@/lib/api/client";
 import { mapProjectToCard, type ProjectCardView } from "@/lib/ui/project-view";
 import type { Project, ProjectPriority } from "@/types/db";
 
 export default function AdminProjectsPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<ProjectCardView[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -175,7 +177,8 @@ export default function AdminProjectsPage() {
               {filtered.map((p) => (
                 <div
                   key={p.id}
-                  className="bg-white border border-zinc-200 hover:border-brand-green hover:shadow-xs rounded-2xl p-5 shadow-2xs transition-all text-left space-y-4 flex flex-col justify-between"
+                  onClick={() => router.push(`/dashboard/admin/projects/${p.id}`)}
+                  className="bg-white border border-zinc-200 hover:border-brand-green hover:shadow-xs rounded-2xl p-5 shadow-2xs transition-all text-left space-y-4 flex flex-col justify-between cursor-pointer"
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-4">
