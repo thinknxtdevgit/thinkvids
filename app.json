@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "7eaed3ff-402d-4e1e-87b6-bcff98fada20"
+      }
+    },
+    "android": {
+      "package": "com.manmeet11783.scripttovidplatform"
+    }
+  }
+}
